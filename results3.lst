@@ -1,0 +1,259 @@
+SQL> 
+SQL> set echo on
+SQL> set linesize 130
+SQL> set pagesize 100
+SQL> 
+SQL> @@ 02
+SQL> column "Originating City" format a18
+SQL> column "Date of Departure" format a18
+SQL> select DEP_FLIGHT_NO "Flight #", AIR_LOCATION "Originating City", to_char(DEP_DEP_DATE, 'YYYY-MM-DD') "Date of Departure"
+  2  from DEPARTURES, FLIGHT, AIRPORT
+  3  where DEP_FLIGHT_NO = FL_FLIGHT_NO
+  4  and FL_ORIG = AIR_CODE
+  5  and AIR_CODE like 'LAX'
+  6  order by DEP_FLIGHT_NO asc, DEP_DEP_DATE asc
+  7  ;
+
+  Flight # Originating City   Date of Departure                                                                                   
+---------- ------------------ ------------------                                                                                  
+       329 Los Angeles, CA    2012-04-01                                                                                          
+       329 Los Angeles, CA    2012-04-08                                                                                          
+       329 Los Angeles, CA    2012-04-10                                                                                          
+       329 Los Angeles, CA    2012-06-20                                                                                          
+       329 Los Angeles, CA    2012-07-08                                                                                          
+       329 Los Angeles, CA    2012-08-08                                                                                          
+       329 Los Angeles, CA    2012-08-23                                                                                          
+       329 Los Angeles, CA    2012-08-24                                                                                          
+       329 Los Angeles, CA    2012-08-25                                                                                          
+       329 Los Angeles, CA    2012-08-27                                                                                          
+       329 Los Angeles, CA    2012-08-28                                                                                          
+       329 Los Angeles, CA    2012-09-08                                                                                          
+       329 Los Angeles, CA    2012-09-22                                                                                          
+       400 Los Angeles, CA    2012-04-08                                                                                          
+       400 Los Angeles, CA    2012-07-08                                                                                          
+       400 Los Angeles, CA    2012-08-08                                                                                          
+       400 Los Angeles, CA    2012-08-20                                                                                          
+       400 Los Angeles, CA    2012-08-21                                                                                          
+       400 Los Angeles, CA    2012-08-23                                                                                          
+       400 Los Angeles, CA    2012-08-28                                                                                          
+       400 Los Angeles, CA    2012-09-08                                                                                          
+       400 Los Angeles, CA    2012-09-21                                                                                          
+       400 Los Angeles, CA    2012-09-23                                                                                          
+       400 Los Angeles, CA    2012-09-25                                                                                          
+
+24 rows selected.
+
+SQL> @@ 03
+SQL> select RES_FLIGHT_NO "Flight #", O.AIR_CODE "Departing", D.AIR_CODE "Arriving", RES_DATE "Reservation Date", RES_FLIGHT_DATE "Flight Date"
+  2  from FLIGHT, AIRPORT O, AIRPORT D, RESERVATION
+  3  where RES_FLIGHT_NO = FL_FLIGHT_NO
+  4  and FL_ORIG = O.AIR_CODE
+  5  and FL_DEST = D.AIR_CODE
+  6  and RES_NAME like 'Andy Anderson'
+  7  ;
+
+  Flight # Departing        Arriving         Reservation Date   Flight Date                                                       
+---------- ---------------- ---------------- ------------------ ------------------                                                
+       606 PHX              SFO              11-APR-12          21-APR-12                                                         
+       102 PHX              MSP              17-APR-12          18-APR-12                                                         
+
+SQL> @@ 04
+SQL> select unique EQ_SEAT_CAPACITY, EQ_FUEL_CAPACITY, EQ_MILES_PER_GAL
+  2  from EQUIP_TYPE
+  3  where EQ_EQUIP_TYPE like 'BOE%';
+
+EQ_SEAT_CAPACITY EQ_FUEL_CAPACITY EQ_MILES_PER_GAL                                                                                
+---------------- ---------------- ----------------                                                                                
+             480             2800              3.6                                                                                
+             188             1882              3.4                                                                                
+             270             2150              4.1                                                                                
+
+SQL> @@ 09
+SQL> column "Departing City" format a18
+SQL> column "Arriving City" format a18
+SQL> select FL_FLIGHT_NO "Flight #", FL_ORIG "Departing", FL_DEST "Arriving", O.AIR_LOCATION "Departing City", D.AIR_LOCATION "Arriving City"
+  2  from FLIGHT, AIRPORT O, AIRPORT D
+  3  where FL_DEST = D.AIR_CODE
+  4  and FL_ORIG = O.AIR_CODE
+  5  and O.AIR_HUB_AIRLINE is null
+  6  and D.AIR_HUB_AIRLINE is null
+  7  ;
+
+  Flight # Departing        Arriving         Departing City     Arriving City                                                     
+---------- ---------------- ---------------- ------------------ ------------------                                                
+       198 LAX              SFO              Los Angeles, CA    San Francisco, CA                                                 
+
+SQL> @@ 21
+SQL> select substr(AIR_LOCATION,-2,2) "State", count(AIR_LOCATION) "# of Airports"
+  2  from AIRPORT
+  3  group by substr(AIR_LOCATION,-2,2)
+  4  ;
+
+State  # of Airports                                                                                                              
+------ -------------                                                                                                              
+MN                 1                                                                                                              
+CA                 2                                                                                                              
+MI                 1                                                                                                              
+NY                 1                                                                                                              
+TX                 2                                                                                                              
+FL                 2                                                                                                              
+AZ                 2                                                                                                              
+
+7 rows selected.
+
+SQL> @@ 23
+SQL> select (max(PIL_BRTHDATE) - min(PIL_BRTHDATE))/365.25 "Pilot age difference"
+  2  from PILOTS
+  3  ;
+
+Pilot age difference                                                                                                              
+--------------------                                                                                                              
+          60.5776865                                                                                                              
+
+SQL> @@ 90
+SQL> select to_char(TIC_FLIGHT_DATE, 'MM Month') "Month", count(TIC_SEAT) "Tickets Sold"
+  2  from TICKET
+  3  group by to_char(TIC_FLIGHT_DATE, 'MM Month')
+  4  order by to_char(TIC_FLIGHT_DATE, 'MM Month')
+  5  ;
+
+Month                                Tickets Sold                                                                                 
+------------------------------------ ------------                                                                                 
+04 April                                       28                                                                                 
+05 May                                         11                                                                                 
+06 June                                        12                                                                                 
+07 July                                        14                                                                                 
+08 August                                       6                                                                                 
+09 September                                    4                                                                                 
+
+6 rows selected.
+
+SQL> --@@ 91
+SQL> @@ 94
+SQL> select unique DEP_FLIGHT_NO "Flight #"
+  2  from DEPARTURES
+  3  where to_char(DEP_DEP_DATE, 'YYYY-MM-DD') not like '2012-05%'
+  4  ;
+
+  Flight #                                                                                                                        
+----------                                                                                                                        
+        15                                                                                                                        
+        40                                                                                                                        
+        59                                                                                                                        
+        60                                                                                                                        
+       101                                                                                                                        
+       102                                                                                                                        
+       103                                                                                                                        
+       104                                                                                                                        
+       329                                                                                                                        
+       400                                                                                                                        
+       500                                                                                                                        
+       501                                                                                                                        
+       502                                                                                                                        
+       503                                                                                                                        
+       518                                                                                                                        
+       521                                                                                                                        
+       600                                                                                                                        
+       604                                                                                                                        
+       606                                                                                                                        
+       691                                                                                                                        
+       723                                                                                                                        
+      1260                                                                                                                        
+
+22 rows selected.
+
+SQL> @@ 95
+SQL> select count(FL_FLIGHT_NO) "# of Flights", AIR_LOCATION "Departing City"
+  2  from FLIGHT, AIRPORT, DEPARTURES
+  3  where FL_ORIG = AIR_CODE
+  4  and DEP_FLIGHT_NO = FL_FLIGHT_NO
+  5  and (FL_MEAL like 'L' or FL_MEAL like 'D')
+  6  and to_char(DEP_DEP_DATE, 'YYYY-MM-DD') like '2012-05%'
+  7  group by AIR_LOCATION
+  8  ;
+
+# of Flights Departing City                                                                                                       
+------------ ------------------                                                                                                   
+           2 Minneapolis, MN                                                                                                      
+           3 Phoenix, AZ                                                                                                          
+
+SQL> @@ 96
+SQL> select count(DEP_FLIGHT_NO) "# of Departures", AIR_HUB_AIRLINE "Airline"
+  2  from DEPARTURES, AIRPORT, FLIGHT
+  3  where DEP_FLIGHT_NO = FL_FLIGHT_NO
+  4  and FL_ORIG = AIR_CODE
+  5  and AIR_HUB_AIRLINE like '%'
+  6  group by AIR_HUB_AIRLINE
+  7  ;
+
+# of Departures Airline                                                                                                           
+--------------- ------------------------------------------------------------                                                      
+             10 United                                                                                                            
+             21 American                                                                                                          
+             16 Northwest                                                                                                         
+             87 Air West                                                                                                          
+             18 Continental                                                                                                       
+
+SQL> @@ 98
+SQL> select count(TIC_SEAT) "# of Tickets", FL_FLIGHT_NO "Flight #"
+  2  from TICKET, FLIGHT, AIRPORT
+  3  where TIC_FLIGHT_NO = FL_FLIGHT_NO
+  4  and FL_DEST = AIR_CODE
+  5  and AIR_LOCATION like '%CA'
+  6  group by FL_FLIGHT_NO
+  7  ;
+
+# of Tickets   Flight #                                                                                                           
+------------ ----------                                                                                                           
+          16        606                                                                                                           
+           5        600                                                                                                           
+           1         40                                                                                                           
+           3         15                                                                                                           
+
+SQL> @@ 99
+SQL> select sum(FL_FARE) "Total Paid", PAS_NAME "Passenger"
+  2  from FLIGHT, TICKET, PASSENGER
+  3  where FL_FLIGHT_NO = TIC_FLIGHT_NO
+  4  and TIC_ITINERARY_NO = PAS_ITINERARY_NO
+  5  group by PAS_NAME
+  6  ;
+
+Total Paid Passenger                                                                                                              
+---------- -------------------                                                                                                    
+       218 Torgie Torgenson                                                                                                       
+       218 Wei Li                                                                                                                 
+        98 Donald Hardaway                                                                                                        
+       421 Gloria Anderson                                                                                                        
+       158 Edward Blair                                                                                                           
+       218 Anna Li                                                                                                                
+        97 Kylee Newman                                                                                                           
+       218 Kausik Umanath                                                                                                         
+       530 Andy Anderson                                                                                                          
+       158 William Locander                                                                                                       
+       218 Lalitha Umanath                                                                                                        
+        98 Ole Olson                                                                                                              
+        98 Lena Olson                                                                                                             
+        97 Pete Peterson                                                                                                          
+        97 David Peterson                                                                                                         
+       315 Parker Newman                                                                                                          
+       218 Zhaoping Li                                                                                                            
+        97 Andrew Newman                                                                                                          
+       158 Janet Locander                                                                                                         
+       218 Sharda Umanath                                                                                                         
+       158 Valerie Blair                                                                                                          
+        97 Olga Swenson                                                                                                           
+       315 Christopher Newman                                                                                                     
+       315 Ella Newman                                                                                                            
+       218 Michelle Li                                                                                                            
+        97 Hazel Peterson                                                                                                         
+        97 Pete Swenson                                                                                                           
+       315 Holly Newman                                                                                                           
+       218 Narayan Umanath                                                                                                        
+        97 Swen Swenson                                                                                                           
+       218 Lucky Miller                                                                                                           
+       218 John Abbott                                                                                                            
+
+32 rows selected.
+
+SQL> 
+SQL> spool off

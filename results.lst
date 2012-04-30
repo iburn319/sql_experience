@@ -1,0 +1,927 @@
+SQL> 
+SQL> set echo on
+SQL> set linesize 130
+SQL> set pagesize 100
+SQL> 
+SQL> @@ 000
+SQL> select FL_ORIG "Departing", FL_DEST "Arriving",
+  2  to_char(FL_ORIG_TIME, 'hh24:mi') "Departure Time",
+  3  to_char(FL_DEST_TIME, 'hh24:mi') "Arrival Time"
+  4  from FLIGHT
+  5  where FL_TIME_ZONES = 0
+  6  order by FL_FLIGHT_NO
+  7  ;
+
+Departing Arriving  Departure Time  Arrival Time                                                                                  
+--------- --------- --------------- ---------------                                                                               
+FLG       PHX       05:15           06:20                                                                                         
+PHX       FLG       20:30           21:15                                                                                         
+IAH       DFW       08:00           08:55                                                                                         
+DFW       IAH       09:05           10:00                                                                                         
+IAH       DTW       11:30           13:30                                                                                         
+
+SQL> @@ 01
+SQL> column "City" format a18
+SQL> select AIR_CODE "Airport", AIR_LOCATION "City", AIR_ELEVATION "Elevation"
+  2  from AIRPORT
+  3  where AIR_HUB_AIRLINE is null
+  4  order by AIR_ELEVATION desc
+  5  ;
+
+Airport   City                Elevation                                                                                           
+--------- ------------------ ----------                                                                                           
+FLG       Flagstaff, AZ            6920                                                                                           
+SFO       San Francisco, CA          78                                                                                           
+LAX       Los Angeles, CA            37                                                                                           
+
+SQL> @@ 02
+SQL> column "Originating City" format a18
+SQL> column "Date of Departure" format a18
+SQL> select DEP_FLIGHT_NO "Flight #", AIR_LOCATION "Originating City", to_char(DEP_DEP_DATE, 'YYYY-MM-DD') "Date of Departure"
+  2  from DEPARTURES, FLIGHT, AIRPORT
+  3  where DEP_FLIGHT_NO = FL_FLIGHT_NO
+  4  and FL_ORIG = AIR_CODE
+  5  and AIR_CODE like 'LAX'
+  6  order by DEP_FLIGHT_NO asc, DEP_DEP_DATE asc
+  7  ;
+
+  Flight # Originating City   Date of Departure                                                                                   
+---------- ------------------ ------------------                                                                                  
+       329 Los Angeles, CA    2012-04-01                                                                                          
+       329 Los Angeles, CA    2012-04-08                                                                                          
+       329 Los Angeles, CA    2012-04-10                                                                                          
+       329 Los Angeles, CA    2012-06-20                                                                                          
+       329 Los Angeles, CA    2012-07-08                                                                                          
+       329 Los Angeles, CA    2012-08-08                                                                                          
+       329 Los Angeles, CA    2012-08-23                                                                                          
+       329 Los Angeles, CA    2012-08-24                                                                                          
+       329 Los Angeles, CA    2012-08-25                                                                                          
+       329 Los Angeles, CA    2012-08-27                                                                                          
+       329 Los Angeles, CA    2012-08-28                                                                                          
+       329 Los Angeles, CA    2012-09-08                                                                                          
+       329 Los Angeles, CA    2012-09-22                                                                                          
+       400 Los Angeles, CA    2012-04-08                                                                                          
+       400 Los Angeles, CA    2012-07-08                                                                                          
+       400 Los Angeles, CA    2012-08-08                                                                                          
+       400 Los Angeles, CA    2012-08-20                                                                                          
+       400 Los Angeles, CA    2012-08-21                                                                                          
+       400 Los Angeles, CA    2012-08-23                                                                                          
+       400 Los Angeles, CA    2012-08-28                                                                                          
+       400 Los Angeles, CA    2012-09-08                                                                                          
+       400 Los Angeles, CA    2012-09-21                                                                                          
+       400 Los Angeles, CA    2012-09-23                                                                                          
+       400 Los Angeles, CA    2012-09-25                                                                                          
+
+24 rows selected.
+
+SQL> @@ 03
+SQL> select RES_FLIGHT_NO "Flight #", O.AIR_CODE "Departing", D.AIR_CODE "Arriving", RES_DATE "Reservation Date", RES_FLIGHT_DATE "Flight Date"
+  2  from FLIGHT, AIRPORT O, AIRPORT D, RESERVATION
+  3  where RES_FLIGHT_NO = FL_FLIGHT_NO
+  4  and FL_ORIG = O.AIR_CODE
+  5  and FL_DEST = D.AIR_CODE
+  6  and RES_NAME like 'Andy Anderson'
+  7  ;
+
+  Flight # Departing Arriving  Reservation Date   Flight Date                                                                     
+---------- --------- --------- ------------------ ------------------                                                              
+       606 PHX       SFO       11-APR-12          21-APR-12                                                                       
+       102 PHX       MSP       17-APR-12          18-APR-12                                                                       
+
+SQL> @@ 04
+SQL> select unique EQ_SEAT_CAPACITY, EQ_FUEL_CAPACITY, EQ_MILES_PER_GAL
+  2  from EQUIP_TYPE
+  3  where EQ_EQUIP_TYPE like 'BOE%';
+
+EQ_SEAT_CAPACITY EQ_FUEL_CAPACITY EQ_MILES_PER_GAL                                                                                
+---------------- ---------------- ----------------                                                                                
+             480             2800              3.6                                                                                
+             188             1882              3.4                                                                                
+             270             2150              4.1                                                                                
+
+SQL> 
+SQL> @@ 05
+SQL> select PIL_PILOTNAME, PIL_STREET, PIL_CITY, PIL_STATE
+  2  from PILOTS
+  3  where PIL_STATE not like 'TX'
+  4  ;
+
+PIL_PILOTNAME        PIL_STREET                                                   PIL_CITY                             PIL_ST     
+-------------------- ------------------------------------------------------------ ------------------------------------ ------     
+Peden, Maria C.      64 RHODA AVENUE                                              PHOENIX                              AZ         
+Levine, Tony         91 BEVERLY HILL RD                                           FLAGSTAFF                            AZ         
+Moore, Sharon S.     44 THORNHILL TRAIL                                           LOS ANGELES                          CA         
+Scamell, Richard     1500 EAST RIVERSIDE                                          CUPERTINO                            CA         
+Tellez, Kyle         891 BARONSHIRE                                               FLAGSTAFF                            AZ         
+Green, Edward L.     9211 CANYON HILL RD                                          FLAGSTAFF                            AZ         
+
+6 rows selected.
+
+SQL> @@ 06
+SQL> select FL_FLIGHT_NO, FL_ORIG, FL_DEST, to_char(DEP_DEP_DATE, 'YYYY-MM-DD'), FL_FARE
+  2  from flight, departures
+  3  where FL_FLIGHT_NO = DEP_FLIGHT_NO
+  4  and to_char(DEP_DEP_DATE, 'YYYY-MM-DD') like '2012-07%'
+  5  order by FL_ORIG_TIME asc, FL_FLIGHT_NO asc
+  6  ;
+
+FL_FLIGHT_NO FL_ORIG   FL_DEST   TO_CHAR(DEP_DEP_DATE,'YYYY-MM-    FL_FARE                                                        
+------------ --------- --------- ------------------------------ ----------                                                        
+         101 FLG       PHX       2012-07-08                           48.5                                                        
+         101 FLG       PHX       2012-07-15                           48.5                                                        
+         600 PHX       SFO       2012-07-16                            109                                                        
+         600 PHX       SFO       2012-07-08                            109                                                        
+          15 PHX       LAX       2012-07-08                             49                                                        
+         500 IAH       DFW       2012-07-08                             79                                                        
+         502 IAH       JFK       2012-07-08                            289                                                        
+         604 PHX       SFO       2012-07-08                            109                                                        
+         102 PHX       MSP       2012-07-08                            156                                                        
+         501 DFW       IAH       2012-07-08                             79                                                        
+          59 SFO       PHX       2012-07-08                            149                                                        
+         400 LAX       PHX       2012-07-08                             49                                                        
+         691 SFO       PHX       2012-07-19                            109                                                        
+         691 SFO       PHX       2012-07-20                            109                                                        
+         691 SFO       PHX       2012-07-08                            109                                                        
+         691 SFO       PHX       2012-07-23                            109                                                        
+         521 IAH       DTW       2012-07-20                            218                                                        
+         521 IAH       DTW       2012-07-19                            218                                                        
+         521 IAH       DTW       2012-07-08                            218                                                        
+         606 PHX       SFO       2012-07-15                            109                                                        
+         606 PHX       SFO       2012-07-08                            109                                                        
+         503 JFK       IAH       2012-07-27                            289                                                        
+         503 JFK       IAH       2012-07-30                            289                                                        
+         503 JFK       IAH       2012-07-29                            289                                                        
+         503 JFK       IAH       2012-07-08                            289                                                        
+         503 JFK       IAH       2012-07-23                            289                                                        
+         723 DTW       JFK       2012-07-20                            189                                                        
+         723 DTW       JFK       2012-07-26                            189                                                        
+         723 DTW       JFK       2012-07-21                            189                                                        
+         723 DTW       JFK       2012-07-29                            189                                                        
+         723 DTW       JFK       2012-07-08                            189                                                        
+         518 SFO       PHX       2012-07-08                            109                                                        
+         103 MSP       PHX       2012-07-08                            156                                                        
+          60 PHX       SFO       2012-07-08                            139                                                        
+          60 PHX       SFO       2012-07-29                            139                                                        
+        1260 SFO       PHX       2012-07-08                            109                                                        
+        1260 SFO       PHX       2012-07-23                            109                                                        
+         104 PHX       FLG       2012-07-23                           48.5                                                        
+         104 PHX       FLG       2012-07-20                           48.5                                                        
+         104 PHX       FLG       2012-07-08                           48.5                                                        
+         104 PHX       FLG       2012-07-30                           48.5                                                        
+         329 LAX       PHX       2012-07-08                             49                                                        
+          40 PHX       LAX       2012-07-08                             49                                                        
+
+43 rows selected.
+
+SQL> @@ 07
+SQL> select FL_FLIGHT_NO, FL_ORIG, FL_DEST, AIR_LOCATION
+  2  from FLIGHT, AIRPORT
+  3  where FL_ORIG = AIR_CODE
+  4  and AIR_HUB_AIRLINE is null
+  5  ;
+
+FL_FLIGHT_NO FL_ORIG   FL_DEST   AIR_LOCATION                                                                                     
+------------ --------- --------- --------------------                                                                             
+         101 FLG       PHX       Flagstaff, AZ                                                                                    
+         329 LAX       PHX       Los Angeles, CA                                                                                  
+         400 LAX       PHX       Los Angeles, CA                                                                                  
+         198 LAX       SFO       Los Angeles, CA                                                                                  
+          59 SFO       PHX       San Francisco, CA                                                                                
+         691 SFO       PHX       San Francisco, CA                                                                                
+         518 SFO       PHX       San Francisco, CA                                                                                
+        1260 SFO       PHX       San Francisco, CA                                                                                
+
+8 rows selected.
+
+SQL> @@ 08
+SQL> select FL_FLIGHT_NO, FL_ORIG, FL_DEST, AIR_LOCATION
+  2  from FLIGHT, AIRPORT
+  3  where FL_DEST = AIR_CODE
+  4  and AIR_HUB_AIRLINE is null
+  5  ;
+
+FL_FLIGHT_NO FL_ORIG   FL_DEST   AIR_LOCATION                                                                                     
+------------ --------- --------- --------------------                                                                             
+         104 PHX       FLG       Flagstaff, AZ                                                                                    
+          15 PHX       LAX       Los Angeles, CA                                                                                  
+          40 PHX       LAX       Los Angeles, CA                                                                                  
+         600 PHX       SFO       San Francisco, CA                                                                                
+         604 PHX       SFO       San Francisco, CA                                                                                
+         606 PHX       SFO       San Francisco, CA                                                                                
+         198 LAX       SFO       San Francisco, CA                                                                                
+         298 PHX       LAX       Los Angeles, CA                                                                                  
+          60 PHX       SFO       San Francisco, CA                                                                                
+
+9 rows selected.
+
+SQL> @@ 09
+SQL> column "Departing City" format a18
+SQL> column "Arriving City" format a18
+SQL> select FL_FLIGHT_NO "Flight #", FL_ORIG "Departing", FL_DEST "Arriving", O.AIR_LOCATION "Departing City", D.AIR_LOCATION "Arriving City"
+  2  from FLIGHT, AIRPORT O, AIRPORT D
+  3  where FL_DEST = D.AIR_CODE
+  4  and FL_ORIG = O.AIR_CODE
+  5  and O.AIR_HUB_AIRLINE is null
+  6  and D.AIR_HUB_AIRLINE is null
+  7  ;
+
+  Flight # Departing Arriving  Departing City     Arriving City                                                                   
+---------- --------- --------- ------------------ ------------------                                                              
+       198 LAX       SFO       Los Angeles, CA    San Francisco, CA                                                               
+
+SQL> 
+SQL> @@ 10
+SQL> select FL_FLIGHT_NO, DEP_DEP_DATE
+  2  from FLIGHT, EQUIP_TYPE, DEPARTURES
+  3  where DEP_EQUIP_NO = EQ_EQUIP_NO
+  4  and DEP_FLIGHT_NO = FL_FLIGHT_NO
+  5  and EQ_EQUIP_TYPE not like 'BOE%'
+  6  order by DEP_DEP_DATE asc, DEP_FLIGHT_NO desc
+  7  ;
+
+FL_FLIGHT_NO DEP_DEP_DATE                                                                                                         
+------------ ------------------                                                                                                   
+         503 08-APR-12                                                                                                            
+         502 08-APR-12                                                                                                            
+         501 08-APR-12                                                                                                            
+         500 08-APR-12                                                                                                            
+          60 08-APR-12                                                                                                            
+          59 08-APR-12                                                                                                            
+          60 19-APR-12                                                                                                            
+         503 28-APR-12                                                                                                            
+         503 29-APR-12                                                                                                            
+         500 02-JUN-12                                                                                                            
+          60 04-JUN-12                                                                                                            
+         501 05-JUN-12                                                                                                            
+          60 05-JUN-12                                                                                                            
+         501 07-JUN-12                                                                                                            
+          60 08-JUN-12                                                                                                            
+          60 10-JUN-12                                                                                                            
+         500 18-JUN-12                                                                                                            
+          60 20-JUN-12                                                                                                            
+          60 21-JUN-12                                                                                                            
+         501 22-JUN-12                                                                                                            
+         501 29-JUN-12                                                                                                            
+         503 08-JUL-12                                                                                                            
+         502 08-JUL-12                                                                                                            
+         501 08-JUL-12                                                                                                            
+         500 08-JUL-12                                                                                                            
+          60 08-JUL-12                                                                                                            
+          59 08-JUL-12                                                                                                            
+         503 23-JUL-12                                                                                                            
+         503 27-JUL-12                                                                                                            
+         503 29-JUL-12                                                                                                            
+          60 29-JUL-12                                                                                                            
+         503 30-JUL-12                                                                                                            
+         503 08-AUG-12                                                                                                            
+         502 08-AUG-12                                                                                                            
+         501 08-AUG-12                                                                                                            
+         500 08-AUG-12                                                                                                            
+          60 08-AUG-12                                                                                                            
+          59 08-AUG-12                                                                                                            
+          60 24-AUG-12                                                                                                            
+         500 01-SEP-12                                                                                                            
+         503 08-SEP-12                                                                                                            
+         502 08-SEP-12                                                                                                            
+         501 08-SEP-12                                                                                                            
+         500 08-SEP-12                                                                                                            
+          60 08-SEP-12                                                                                                            
+          59 08-SEP-12                                                                                                            
+         501 09-SEP-12                                                                                                            
+          60 25-SEP-12                                                                                                            
+
+48 rows selected.
+
+SQL> @@ 11
+SQL> select FL_FLIGHT_NO, FL_ORIG, FL_DEST, FL_DISTANCE, FL_FARE, (FL_DISTANCE / FL_FARE) QUOTIENT
+  2  from FLIGHT
+  3  order by QUOTIENT desc, FL_FLIGHT_NO asc
+  4  ;
+
+FL_FLIGHT_NO FL_ORIG   FL_DEST   FL_DISTANCE    FL_FARE   QUOTIENT                                                                
+------------ --------- --------- ----------- ---------- ----------                                                                
+         298 PHX       LAX               400         39 10.2564103                                                                
+          15 PHX       LAX               400         49 8.16326531                                                                
+          40 PHX       LAX               400         49 8.16326531                                                                
+         329 LAX       PHX               400         49 8.16326531                                                                
+         400 LAX       PHX               400         49 8.16326531                                                                
+         518 SFO       PHX               750        109 6.88073394                                                                
+         600 PHX       SFO               750        109 6.88073394                                                                
+         604 PHX       SFO               750        109 6.88073394                                                                
+         606 PHX       SFO               750        109 6.88073394                                                                
+         691 SFO       PHX               750        109 6.88073394                                                                
+        1260 SFO       PHX               750        109 6.88073394                                                                
+         102 PHX       MSP              1000        156 6.41025641                                                                
+         103 MSP       PHX              1000        156 6.41025641                                                                
+         198 LAX       SFO               400         69 5.79710145                                                                
+          60 PHX       SFO               750        139 5.39568345                                                                
+         723 DTW       JFK              1000        189 5.29100529                                                                
+          59 SFO       PHX               750        149 5.03355705                                                                
+         521 IAH       DTW              1000        218 4.58715596                                                                
+         502 IAH       JFK              1200        289 4.15224913                                                                
+         503 JFK       IAH              1200        289 4.15224913                                                                
+         101 FLG       PHX               200       48.5 4.12371134                                                                
+         104 PHX       FLG               200       48.5 4.12371134                                                                
+         500 IAH       DFW               250         79 3.16455696                                                                
+         501 DFW       IAH               250         79 3.16455696                                                                
+
+24 rows selected.
+
+SQL> @@ 12
+SQL> select count(FL_FLIGHT_NO), FL_ORIG
+  2  from FLIGHT
+  3  group by FL_ORIG
+  4  ;
+
+COUNT(FL_FLIGHT_NO) FL_ORIG                                                                                                       
+------------------- ---------                                                                                                     
+                  1 MSP                                                                                                           
+                  3 IAH                                                                                                           
+                  1 DFW                                                                                                           
+                  1 DTW                                                                                                           
+                  1 JFK                                                                                                           
+                  3 LAX                                                                                                           
+                  1 FLG                                                                                                           
+                  9 PHX                                                                                                           
+                  4 SFO                                                                                                           
+
+9 rows selected.
+
+SQL> @@ 13
+SQL> select count(FL_FLIGHT_NO), AIR_LOCATION
+  2  from FLIGHT, AIRPORT
+  3  where AIR_CODE = FL_ORIG
+  4  group by AIR_LOCATION
+  5  ;
+
+COUNT(FL_FLIGHT_NO) AIR_LOCATION                                                                                                  
+------------------- --------------------                                                                                          
+                  1 Minneapolis, MN                                                                                               
+                  3 Los Angeles, CA                                                                                               
+                  1 Dallas, TX                                                                                                    
+                  3 Houston, TX                                                                                                   
+                  1 New York, NY                                                                                                  
+                  9 Phoenix, AZ                                                                                                   
+                  4 San Francisco, CA                                                                                             
+                  1 Detroit, MI                                                                                                   
+                  1 Flagstaff, AZ                                                                                                 
+
+9 rows selected.
+
+SQL> @@ 14
+SQL> select count(FL_FLIGHT_NO), AIR_LOCATION
+  2  from FLIGHT, AIRPORT
+  3  where FL_ORIG(+) = AIR_CODE
+  4  group by AIR_LOCATION
+  5  ;
+
+COUNT(FL_FLIGHT_NO) AIR_LOCATION                                                                                                  
+------------------- --------------------                                                                                          
+                  1 Minneapolis, MN                                                                                               
+                  3 Los Angeles, CA                                                                                               
+                  1 Dallas, TX                                                                                                    
+                  0 Miami, FL                                                                                                     
+                  3 Houston, TX                                                                                                   
+                  1 New York, NY                                                                                                  
+                  9 Phoenix, AZ                                                                                                   
+                  4 San Francisco, CA                                                                                             
+                  0 Orlando, FL                                                                                                   
+                  1 Detroit, MI                                                                                                   
+                  1 Flagstaff, AZ                                                                                                 
+
+11 rows selected.
+
+SQL> 
+SQL> @@ 15
+SQL> select avg(PIL_FLIGHT_PAY), PIL_STATE
+  2  from PILOTS
+  3  group by PIL_STATE
+  4  ;
+
+AVG(PIL_FLIGHT_PAY) PIL_ST                                                                                                        
+------------------- ------                                                                                                        
+               1780 CA                                                                                                            
+               3100 TX                                                                                                            
+               2605 AZ                                                                                                            
+
+SQL> @@ 16
+SQL> column PIL_PILOTNAME format a20
+SQL> select PIL_PILOTNAME, PIL_FLIGHT_PAY
+  2  from PILOTS
+  3  where PIL_FLIGHT_PAY >
+  4  	     (select avg(PIL_FLIGHT_PAY) from PILOTS)
+  5  ;
+
+PIL_PILOTNAME        PIL_FLIGHT_PAY                                                                                               
+-------------------- --------------                                                                                               
+Levine, Tony                   2640                                                                                               
+Moore, Sharon S.               3000                                                                                               
+Long, Stuart                   3000                                                                                               
+Rhoades, Mack B.               3150                                                                                               
+Harris, Kenneth C.             3150                                                                                               
+Tellez, Kyle                   2640                                                                                               
+Green, Edward L.               2640                                                                                               
+
+7 rows selected.
+
+SQL> --@@ 17
+SQL> --@@ 18
+SQL> --@@ 19
+SQL> 
+SQL> @@ 20
+SQL> select count(DEP_FLIGHT_NO), FL_TIME_ZONES
+  2  from FLIGHT, DEPARTURES
+  3  where DEP_FLIGHT_NO = FL_FLIGHT_NO
+  4  group by FL_TIME_ZONES
+  5  ;
+
+COUNT(DEP_FLIGHT_NO) FL_TIME_ZONES                                                                                                
+-------------------- -------------                                                                                                
+                 102             1                                                                                                
+                  83            -1                                                                                                
+                  41             0                                                                                                
+
+SQL> @@ 21
+SQL> select substr(AIR_LOCATION,-2,2) "State", count(AIR_LOCATION) "# of Airports"
+  2  from AIRPORT
+  3  group by substr(AIR_LOCATION,-2,2)
+  4  ;
+
+State  # of Airports                                                                                                              
+------ -------------                                                                                                              
+MN                 1                                                                                                              
+CA                 2                                                                                                              
+MI                 1                                                                                                              
+NY                 1                                                                                                              
+TX                 2                                                                                                              
+FL                 2                                                                                                              
+AZ                 2                                                                                                              
+
+7 rows selected.
+
+SQL> @@ 22
+SQL> select count(DEP_FLIGHT_NO)
+  2  from DEPARTURES, FLIGHT
+  3  where DEP_FLIGHT_NO = FL_FLIGHT_NO
+  4  and FL_DISTANCE >= 1000
+  5  ;
+
+COUNT(DEP_FLIGHT_NO)                                                                                                              
+--------------------                                                                                                              
+                  62                                                                                                              
+
+SQL> @@ 23
+SQL> select (max(PIL_BRTHDATE) - min(PIL_BRTHDATE))/365.25 "Pilot age difference"
+  2  from PILOTS
+  3  ;
+
+Pilot age difference                                                                                                              
+--------------------                                                                                                              
+          60.5776865                                                                                                              
+
+SQL> @@ 24
+SQL> select unique EQ_EQUIP_TYPE, EQ_FUEL_CAPACITY * EQ_MILES_PER_GAL "Total Distance"
+  2  from EQUIP_TYPE
+  3  order by "Total Distance" desc
+  4  ;
+
+EQ_EQUIP_TYPE                  Total Distance                                                                                     
+------------------------------ --------------                                                                                     
+BOE 747                                 10080                                                                                     
+DC 7                                     8892                                                                                     
+BOE 737                                  8815                                                                                     
+CONCORDE                                 8525                                                                                     
+BOE 727                                6398.8                                                                                     
+
+SQL> 
+SQL> --@@ 25
+SQL> --@@ 26
+SQL> --@@ 27
+SQL> --@@ 28
+SQL> --@@ 29
+SQL> 
+SQL> --@@ 30
+SQL> --@@ 31
+SQL> --@@ 32
+SQL> --@@ 33
+SQL> @@ 34
+SQL> select FL_FLIGHT_NO, FL_ORIG, FL_DEST, to_char(FL_ORIG_TIME, 'HH24:mi'), to_char(FL_DEST_TIME, 'HH24:mi')
+  2  from FLIGHT, RESERVATION
+  3  where RES_FLIGHT_NO = FL_FLIGHT_NO
+  4  and to_char(RES_FLIGHT_DATE, 'YYYY-MM-DD') not like '2012-07-08'
+  5  order by FL_FLIGHT_NO asc
+  6  ;
+
+FL_FLIGHT_NO FL_ORIG   FL_DEST   TO_CHAR(FL_ORIG TO_CHAR(FL_DEST                                                                  
+------------ --------- --------- --------------- ---------------                                                                  
+          15 PHX       LAX       07:00           07:20                                                                            
+         101 FLG       PHX       05:15           06:20                                                                            
+         101 FLG       PHX       05:15           06:20                                                                            
+         102 PHX       MSP       09:00           13:00                                                                            
+         104 PHX       FLG       20:30           21:15                                                                            
+         104 PHX       FLG       20:30           21:15                                                                            
+         518 SFO       PHX       14:23           16:16                                                                            
+         600 PHX       SFO       06:46           07:50                                                                            
+         606 PHX       SFO       11:45           12:50                                                                            
+         606 PHX       SFO       11:45           12:50                                                                            
+         606 PHX       SFO       11:45           12:50                                                                            
+         606 PHX       SFO       11:45           12:50                                                                            
+         606 PHX       SFO       11:45           12:50                                                                            
+         691 SFO       PHX       11:25           13:04                                                                            
+         691 SFO       PHX       11:25           13:04                                                                            
+        1260 SFO       PHX       17:58           19:51                                                                            
+        1260 SFO       PHX       17:58           19:51                                                                            
+
+17 rows selected.
+
+SQL> 
+SQL> --@@ 35
+SQL> @@ 36
+SQL> column AIR_LOCATION format a20
+SQL> 
+SQL> select Orig.AIR_LOCATION, Dest.AIR_LOCATION
+  2  from airport Orig, airport Dest, flight, ticket, passenger
+  3  where FL_FLIGHT_NO = TIC_FLIGHT_NO
+  4  and TIC_ITINERARY_NO = PAS_ITINERARY_NO
+  5  and PAS_NAME like '%Newman'
+  6  and Orig.AIR_CODE = FL_ORIG
+  7  and Dest.AIR_CODE = FL_DEST
+  8  ;
+
+AIR_LOCATION         AIR_LOCATION                                                                                                 
+-------------------- --------------------                                                                                         
+San Francisco, CA    Phoenix, AZ                                                                                                  
+Phoenix, AZ          San Francisco, CA                                                                                            
+San Francisco, CA    Phoenix, AZ                                                                                                  
+Phoenix, AZ          San Francisco, CA                                                                                            
+San Francisco, CA    Phoenix, AZ                                                                                                  
+Phoenix, AZ          San Francisco, CA                                                                                            
+San Francisco, CA    Phoenix, AZ                                                                                                  
+Phoenix, AZ          San Francisco, CA                                                                                            
+Flagstaff, AZ        Phoenix, AZ                                                                                                  
+Phoenix, AZ          Flagstaff, AZ                                                                                                
+Flagstaff, AZ        Phoenix, AZ                                                                                                  
+Phoenix, AZ          Flagstaff, AZ                                                                                                
+Flagstaff, AZ        Phoenix, AZ                                                                                                  
+Phoenix, AZ          Flagstaff, AZ                                                                                                
+Flagstaff, AZ        Phoenix, AZ                                                                                                  
+Phoenix, AZ          Flagstaff, AZ                                                                                                
+Flagstaff, AZ        Phoenix, AZ                                                                                                  
+Phoenix, AZ          Flagstaff, AZ                                                                                                
+Flagstaff, AZ        Phoenix, AZ                                                                                                  
+Phoenix, AZ          Flagstaff, AZ                                                                                                
+
+20 rows selected.
+
+SQL> @@ 37
+SQL> select PIL_PILOTNAME
+  2  from PILOTS
+  3  where PIL_PILOTNAME not like '%.%'
+  4  ;
+
+PIL_PILOTNAME                                                                                                                     
+--------------------                                                                                                              
+Levine, Tony                                                                                                                      
+Scamell, Richard                                                                                                                  
+Long, Stuart                                                                                                                      
+Tellez, Kyle                                                                                                                      
+
+SQL> --@@ 38
+SQL> --@@ 39
+SQL> 
+SQL> @@ 40
+SQL> column AIR_LOCATION format a20
+SQL> 
+SQL> select Orig.AIR_LOCATION, to_char(FL_ORIG_TIME, 'HH24:mi'), Dest.AIR_LOCATION, to_char(FL_DEST_TIME, 'HH24:mi')
+  2  from airport Orig, airport Dest, flight, reservation
+  3  where Orig.AIR_CODE = FL_ORIG
+  4  and Dest.AIR_CODE = FL_DEST
+  5  and RES_FLIGHT_NO = FL_FLIGHT_NO
+  6  and RES_NAME like '%Newman'
+  7  ;
+
+AIR_LOCATION         TO_CHAR(FL_ORIG AIR_LOCATION         TO_CHAR(FL_DEST                                                         
+-------------------- --------------- -------------------- ---------------                                                         
+San Francisco, CA    14:23           Phoenix, AZ          16:16                                                                   
+Phoenix, AZ          20:30           Flagstaff, AZ        21:15                                                                   
+Phoenix, AZ          20:30           Flagstaff, AZ        21:15                                                                   
+
+SQL> --@@ 41
+SQL> --@@ 42
+SQL> --@@ 43
+SQL> --@@ 44
+SQL> 
+SQL> --@@ 45
+SQL> @@ 46
+SQL> select count(TIC_SEAT), FL_FLIGHT_NO
+  2  from TICKET, FLIGHT
+  3  where FL_FLIGHT_NO = TIC_FLIGHT_NO
+  4  group by FL_FLIGHT_NO
+  5  ;
+
+COUNT(TIC_SEAT) FL_FLIGHT_NO                                                                                                      
+--------------- ------------                                                                                                      
+             16          606                                                                                                      
+              4          691                                                                                                      
+              4          518                                                                                                      
+              5          600                                                                                                      
+              6          329                                                                                                      
+              2          102                                                                                                      
+              8         1260                                                                                                      
+             12          101                                                                                                      
+              1           40                                                                                                      
+             12          104                                                                                                      
+              3           15                                                                                                      
+              2          103                                                                                                      
+
+12 rows selected.
+
+SQL> --@@ 47
+SQL> --@@ 48
+SQL> @@ 49
+SQL> select PIL_PILOTNAME, sum(FL_DISTANCE) "Total Distance"
+  2  from PILOTS, DEPARTURES, FLIGHT
+  3  where PIL_PILOT_ID(+) = DEP_PILOT_ID
+  4  and DEP_FLIGHT_NO = FL_FLIGHT_NO
+  5  group by PIL_PILOTNAME
+  6  order by "Total Distance" desc
+  7  ;
+
+PIL_PILOTNAME        Total Distance                                                                                               
+-------------------- --------------                                                                                               
+Rhoades, Mack B.              33250                                                                                               
+Harris, Kenneth C.            32600                                                                                               
+Long, Stuart                  28700                                                                                               
+Peden, Maria C.               25600                                                                                               
+Green, Edward L.              16800                                                                                               
+Levine, Tony                  13500                                                                                               
+Scamell, Richard               4000                                                                                               
+Tellez, Kyle                    400                                                                                               
+
+8 rows selected.
+
+SQL> 
+SQL> --@@ 50
+SQL> --@@ 51
+SQL> --@@ 52
+SQL> --@@ 53
+SQL> --@@ 54
+SQL> 
+SQL> --@@ 55
+SQL> --@@ 56
+SQL> --@@ 57
+SQL> --@@ 58
+SQL> --@@ 59
+SQL> 
+SQL> --@@ 60
+SQL> --@@ 61
+SQL> --@@ 62
+SQL> --@@ 63
+SQL> --@@ 64
+SQL> 
+SQL> --@@ 65
+SQL> --@@ 66
+SQL> --@@ 67
+SQL> --@@ 68
+SQL> --@@ 69
+SQL> 
+SQL> --@@ 70
+SQL> --@@ 71
+SQL> --@@ 72
+SQL> --@@ 73
+SQL> --@@ 74
+SQL> 
+SQL> --@@ 75
+SQL> --@@ 76
+SQL> --@@ 77
+SQL> --@@ 78
+SQL> --@@ 79
+SQL> 
+SQL> --@@ 80
+SQL> --@@ 81
+SQL> --@@ 82
+SQL> --@@ 83
+SQL> --@@ 84
+SQL> 
+SQL> --@@ 85
+SQL> --@@ 86
+SQL> --@@ 87
+SQL> --@@ 88
+SQL> --@@ 89
+SQL> 
+SQL> --@@ 90
+SQL> --@@ 91
+SQL> --@@ 92
+SQL> --@@ 93
+SQL> @@ 94
+SQL> select unique DEP_FLIGHT_NO "Flight #"
+  2  from DEPARTURES
+  3  where to_char(DEP_DEP_DATE, 'YYYY-MM-DD') not like '2012-05%'
+  4  ;
+
+  Flight #                                                                                                                        
+----------                                                                                                                        
+        15                                                                                                                        
+        40                                                                                                                        
+        59                                                                                                                        
+        60                                                                                                                        
+       101                                                                                                                        
+       102                                                                                                                        
+       103                                                                                                                        
+       104                                                                                                                        
+       329                                                                                                                        
+       400                                                                                                                        
+       500                                                                                                                        
+       501                                                                                                                        
+       502                                                                                                                        
+       503                                                                                                                        
+       518                                                                                                                        
+       521                                                                                                                        
+       600                                                                                                                        
+       604                                                                                                                        
+       606                                                                                                                        
+       691                                                                                                                        
+       723                                                                                                                        
+      1260                                                                                                                        
+
+22 rows selected.
+
+SQL> 
+SQL> @@ 95
+SQL> select count(FL_FLIGHT_NO) "# of Flights", AIR_LOCATION "Departing City"
+  2  from FLIGHT, AIRPORT, DEPARTURES
+  3  where FL_ORIG = AIR_CODE
+  4  and DEP_FLIGHT_NO = FL_FLIGHT_NO
+  5  and (FL_MEAL like 'L' or FL_MEAL like 'D')
+  6  and to_char(DEP_DEP_DATE, 'YYYY-MM-DD') like '2012-05%'
+  7  group by AIR_LOCATION
+  8  ;
+
+# of Flights Departing City                                                                                                       
+------------ ------------------                                                                                                   
+           2 Minneapolis, MN                                                                                                      
+           3 Phoenix, AZ                                                                                                          
+
+SQL> @@ 96
+SQL> select count(DEP_FLIGHT_NO) "# of Departures", AIR_HUB_AIRLINE "Airline"
+  2  from DEPARTURES, AIRPORT, FLIGHT
+  3  where DEP_FLIGHT_NO = FL_FLIGHT_NO
+  4  and FL_ORIG = AIR_CODE
+  5  and AIR_HUB_AIRLINE like '%'
+  6  group by AIR_HUB_AIRLINE
+  7  ;
+
+# of Departures Airline                                                                                                           
+--------------- ------------------------------------------------------------                                                      
+             10 United                                                                                                            
+             21 American                                                                                                          
+             16 Northwest                                                                                                         
+             87 Air West                                                                                                          
+             18 Continental                                                                                                       
+
+SQL> --@@ 97
+SQL> @@ 98
+SQL> select count(TIC_SEAT) "# of Tickets", FL_FLIGHT_NO "Flight #"
+  2  from TICKET, FLIGHT, AIRPORT
+  3  where TIC_FLIGHT_NO = FL_FLIGHT_NO
+  4  and FL_DEST = AIR_CODE
+  5  and AIR_LOCATION like '%CA'
+  6  group by FL_FLIGHT_NO
+  7  ;
+
+# of Tickets   Flight #                                                                                                           
+------------ ----------                                                                                                           
+          16        606                                                                                                           
+           5        600                                                                                                           
+           1         40                                                                                                           
+           3         15                                                                                                           
+
+SQL> @@ 99
+SQL> select sum(FL_FARE) "Total Paid", PAS_NAME "Passenger"
+  2  from FLIGHT, TICKET, PASSENGER
+  3  where FL_FLIGHT_NO = TIC_FLIGHT_NO
+  4  and TIC_ITINERARY_NO = PAS_ITINERARY_NO
+  5  group by PAS_NAME
+  6  ;
+
+Total Paid Passenger                                                                                                              
+---------- ------------------------------------------------------------                                                           
+       218 Torgie Torgenson                                                                                                       
+       218 Wei Li                                                                                                                 
+        98 Donald Hardaway                                                                                                        
+       421 Gloria Anderson                                                                                                        
+       158 Edward Blair                                                                                                           
+       218 Anna Li                                                                                                                
+        97 Kylee Newman                                                                                                           
+       218 Kausik Umanath                                                                                                         
+       530 Andy Anderson                                                                                                          
+       158 William Locander                                                                                                       
+       218 Lalitha Umanath                                                                                                        
+        98 Ole Olson                                                                                                              
+        98 Lena Olson                                                                                                             
+        97 Pete Peterson                                                                                                          
+        97 David Peterson                                                                                                         
+       315 Parker Newman                                                                                                          
+       218 Zhaoping Li                                                                                                            
+        97 Andrew Newman                                                                                                          
+       158 Janet Locander                                                                                                         
+       218 Sharda Umanath                                                                                                         
+       158 Valerie Blair                                                                                                          
+        97 Olga Swenson                                                                                                           
+       315 Christopher Newman                                                                                                     
+       315 Ella Newman                                                                                                            
+       218 Michelle Li                                                                                                            
+        97 Hazel Peterson                                                                                                         
+        97 Pete Swenson                                                                                                           
+       315 Holly Newman                                                                                                           
+       218 Narayan Umanath                                                                                                        
+        97 Swen Swenson                                                                                                           
+       218 Lucky Miller                                                                                                           
+       218 John Abbott                                                                                                            
+
+32 rows selected.
+
+SQL> 
+SQL> @@ 100
+SQL> select count(DEP_FLIGHT_NO), DEP_DEP_DATE
+  2  from DEPARTURES
+  3  group by DEP_DEP_DATE
+  4  order by DEP_DEP_DATE asc
+  5  ;
+
+COUNT(DEP_FLIGHT_NO) DEP_DEP_DATE                                                                                                 
+-------------------- ------------------                                                                                           
+                   2 01-APR-12                                                                                                    
+                   2 02-APR-12                                                                                                    
+                  22 08-APR-12                                                                                                    
+                   1 10-APR-12                                                                                                    
+                   1 17-APR-12                                                                                                    
+                   3 18-APR-12                                                                                                    
+                   3 19-APR-12                                                                                                    
+                   1 20-APR-12                                                                                                    
+                   4 21-APR-12                                                                                                    
+                   4 22-APR-12                                                                                                    
+                   2 23-APR-12                                                                                                    
+                   3 24-APR-12                                                                                                    
+                   4 25-APR-12                                                                                                    
+                   1 27-APR-12                                                                                                    
+                   1 28-APR-12                                                                                                    
+                   5 29-APR-12                                                                                                    
+                   2 30-APR-12                                                                                                    
+                   1 01-MAY-12                                                                                                    
+                   1 05-MAY-12                                                                                                    
+                   2 13-MAY-12                                                                                                    
+                   1 17-MAY-12                                                                                                    
+                   2 18-MAY-12                                                                                                    
+                   1 19-MAY-12                                                                                                    
+                   1 25-MAY-12                                                                                                    
+                   1 30-MAY-12                                                                                                    
+                   3 02-JUN-12                                                                                                    
+                   1 04-JUN-12                                                                                                    
+                   2 05-JUN-12                                                                                                    
+                   1 07-JUN-12                                                                                                    
+                   1 08-JUN-12                                                                                                    
+                   1 10-JUN-12                                                                                                    
+                   1 18-JUN-12                                                                                                    
+                   2 20-JUN-12                                                                                                    
+                   5 21-JUN-12                                                                                                    
+                   1 22-JUN-12                                                                                                    
+                   1 27-JUN-12                                                                                                    
+                   4 28-JUN-12                                                                                                    
+                   3 29-JUN-12                                                                                                    
+                  22 08-JUL-12                                                                                                    
+                   2 15-JUL-12                                                                                                    
+                   1 16-JUL-12                                                                                                    
+                   2 19-JUL-12                                                                                                    
+                   4 20-JUL-12                                                                                                    
+                   1 21-JUL-12                                                                                                    
+                   4 23-JUL-12                                                                                                    
+                   1 26-JUL-12                                                                                                    
+                   1 27-JUL-12                                                                                                    
+                   3 29-JUL-12                                                                                                    
+                   2 30-JUL-12                                                                                                    
+                  22 08-AUG-12                                                                                                    
+                   3 20-AUG-12                                                                                                    
+                   2 21-AUG-12                                                                                                    
+                   2 23-AUG-12                                                                                                    
+                   3 24-AUG-12                                                                                                    
+                   3 25-AUG-12                                                                                                    
+                   2 26-AUG-12                                                                                                    
+                   1 27-AUG-12                                                                                                    
+                   4 28-AUG-12                                                                                                    
+                   2 29-AUG-12                                                                                                    
+                   2 01-SEP-12                                                                                                    
+                  22 08-SEP-12                                                                                                    
+                   1 09-SEP-12                                                                                                    
+                   2 21-SEP-12                                                                                                    
+                   4 22-SEP-12                                                                                                    
+                   2 23-SEP-12                                                                                                    
+                   3 25-SEP-12                                                                                                    
+                   1 26-SEP-12                                                                                                    
+                   1 28-SEP-12                                                                                                    
+                   4 29-SEP-12                                                                                                    
+
+69 rows selected.
+
+SQL> 
+SQL> spool off

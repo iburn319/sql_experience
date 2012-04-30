@@ -1,0 +1,5 @@
+select count(DEP_FLIGHT_NO)
+from DEPARTURES, FLIGHT
+where DEP_FLIGHT_NO = FL_FLIGHT_NO
+and FL_DISTANCE >= 1000
+;

@@ -1,0 +1,4 @@
+select PIL_PILOTNAME, PIL_STREET, PIL_CITY, PIL_STATE
+from PILOTS
+where PIL_STATE not like 'TX'
+;

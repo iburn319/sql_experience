@@ -1,0 +1,6 @@
+select sum(FL_FARE) "Total Paid", PAS_NAME "Passenger"
+from FLIGHT, TICKET, PASSENGER
+where FL_FLIGHT_NO = TIC_FLIGHT_NO
+and TIC_ITINERARY_NO = PAS_ITINERARY_NO
+group by PAS_NAME
+;

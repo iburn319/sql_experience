@@ -1,0 +1,5 @@
+select count(FL_FLIGHT_NO), AIR_LOCATION
+from FLIGHT, AIRPORT
+where FL_ORIG(+) = AIR_CODE
+group by AIR_LOCATION
+;

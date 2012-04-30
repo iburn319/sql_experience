@@ -1,0 +1,5 @@
+select count(TIC_SEAT), FL_FLIGHT_NO
+from TICKET, FLIGHT
+where FL_FLIGHT_NO = TIC_FLIGHT_NO
+group by FL_FLIGHT_NO
+;

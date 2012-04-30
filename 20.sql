@@ -1,0 +1,5 @@
+select count(DEP_FLIGHT_NO), FL_TIME_ZONES
+from FLIGHT, DEPARTURES
+where DEP_FLIGHT_NO = FL_FLIGHT_NO
+group by FL_TIME_ZONES
+;
